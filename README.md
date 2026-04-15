@@ -41,6 +41,33 @@ Deploy:    Wrangler CLI
 
 ---
 
+## ☁️ Cloudflare 利用構成
+
+```mermaid
+graph TD
+    User["👤 ユーザー (ブラウザ)"]
+
+    subgraph CF ["☁️ Cloudflare"]
+        direction TB
+        DNS["🌐 DNS\nzadonutsimulator.zephel.com"]
+        Worker["⚙️ Cloudflare Workers\nsrc/worker.js"]
+        Assets["📦 Static Assets\nindex.html / app.js / style.css ..."]
+        D1["🗄️ Cloudflare D1\nzadonut_db (SQLite)"]
+        Analytics["📊 Web Analytics"]
+    end
+
+    User -->|"HTTPS リクエスト"| DNS
+    DNS --> Worker
+    Worker -->|"静的ファイル配信"| Assets
+    Assets -->|"HTML / JS / CSS"| User
+    Worker -->|"POST /api/comments\nGET  /api/comments\nGET  /api/ranking\nPOST /api/register\nDELETE /api/admin/comments/:id"| D1
+    D1 -->|"JSON レスポンス"| Worker
+    Worker -->|"API レスポンス"| User
+    User -.->|"ページ閲覧ログ (beacon)"| Analytics
+```
+
+---
+
 ## 📁 ファイル構成
 
 ```
