@@ -4,10 +4,9 @@
 > きのみの組み合わせによって変化するドーナツの効果・持続時間・フレーバーパワーをリアルタイムで計算し、最適なレシピを探せます。
 
 [![Version](https://img.shields.io/badge/version-v1.9.8-blue)](./version.js)
-[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange?logo=cloudflare)](https://workers.cloudflare.com/)
-[![License](https://img.shields.io/badge/license-MIT-green)](#license)
-
-**🌐 [zadonutsimulator.zephel.com](https://zadonutsimulator.zephel.com/)**
+[![Deploy](https://img.shields.io/badge/deploy-Cloudflare_Workers-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen)](#license)
+[![Website](https://img.shields.io/badge/🌐_website-zadonutsimulator.zephel.com-4A90D9)](https://zadonutsimulator.zephel.com/)
 
 ---
 
@@ -162,4 +161,4 @@ MIT License — 自由に使用・改変・再配布できます。
 
 ---
 
-*Created by [くーるぜろ (@zephel01_vc)](https://x.com/zephel01_vc)*
+*Created by [くーるぜろ (@zephel01)](https://note.com/zephel01)*
