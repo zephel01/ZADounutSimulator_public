@@ -1,0 +1,26 @@
+{
+  "name": "zadonutsimulator",
+  "main": "src/worker.js",
+  "build": {
+    "command": ""
+  },
+  "assets": {
+    "directory": "."
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "zadonut_db",
+      "database_id": "YOUR_D1_DATABASE_ID"
+    }
+  ],
+  "vars": {
+    // ADMIN_KEY は wrangler secret put ADMIN_KEY で設定してください（平文でコミットしないこと）
+    // "ADMIN_KEY": "YOUR_ADMIN_KEY_HERE"
+  },
+  "compatibility_date": "2026-01-21",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

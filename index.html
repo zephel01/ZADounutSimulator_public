@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <!-- 文字エンコーディング -->
+    <meta charset="UTF-8">
+
+    <!-- モバイル対応 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- ページ説明 -->
+    <meta name="description" content="Pokemon Legends ZA 向けドーナツレシピ シミュレーター。きのみ選択でドーナツ効果や最強レシピをシミュレーションできます。">
+
+    <!-- OG（SNS用） -->
+    <meta property="og:title" content="Pokemon Legends ZA ドーナツシミュレーター">
+    <meta property="og:description" content="きのみの組み合わせでドーナツ効果をシミュレーション。人気レシピや最適解探索も可能！">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zadonutsimulator.zephel.com/">
+    <meta property="og:image" content="https://zadonutsimulator.zephel.com/og-image.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pokemon Legends ZA ドーナツシミュレーター">
+    <meta name="twitter:description" content="Pokemon Legends ZA のドーナツ効果を簡単シミュレーション。きのみ組合せで最強レシピ検索も！">
+    <meta name="twitter:image" content="https://zadonutsimulator.zephel.com/twitter-image.png">
+    <title>Pokemon Legends ZA - Donut Simulator</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="title-area">
+                <h1>Donut Simulator</h1>
+                <p class="subtitle">Pokemon Legends ZA ドーナツレシピ調合シミュレータ</p>
+                <div class="version-info" id="version-display"></div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button id="theme-toggle" class="theme-btn" aria-label="テーマ切り替え">🌙</button>
+                <button id="help-btn" class="help-btn" aria-label="使い方">?</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="layout-main">
+            <!-- Left Panel: Tabs (Selection / Search) -->
+            <div class="left-panel">
+                <div class="tab-header">
+                    <button class="tab-btn active" data-tab="selection">選択中のきのみ <span
+                            id="selection-count">(0/8)</span></button>
+                    <button class="tab-btn" data-tab="search">ドーナツ検索</button>
+                </div>
+
+                <!-- Tab 1: Selection Area -->
+                <div id="tab-selection" class="tab-content active">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="actions">
+                                <button class="action-btn" onclick="saveRecipe()">保存</button>
+                                <button class="action-btn" onclick="downloadScript()">スクリプト</button>
+                                <div class="share-btn-group">
+                                    <button class="share-icon-btn x" onclick="shareToX()"
+                                        aria-label="Share on X">𝕏</button>
+                                    <button class="share-icon-btn line" onclick="shareToLine()"
+                                        aria-label="Share on LINE">L</button>
+                                    <button class="share-icon-btn fb" onclick="shareToFacebook()"
+                                        aria-label="Share on Facebook">f</button>
+                                    <button class="share-icon-btn copy" onclick="copyShareLink()"
+                                        aria-label="Copy Link">🔗</button>
+                                </div>
+                                <button class="reset-btn" onclick="clearSelection()">リセット</button>
+                            </div>
+                        </div>
+
+                        <div class="selected-list" id="selected-list">
+                            <!-- JS updates -->
+                        </div>
+
+                        <div id="saved-recipes-container" class="saved-recipes-container hidden">
+                            <h3>保存済みレシピ</h3>
+                            <div id="saved-recipes-list" class="saved-recipes-list"></div>
+                        </div>
+
+                        <div class="berry-search-container">
+                            <input type="text" id="berry-search" placeholder="きのみを検索 (名前、フレーバー)..."
+                                class="styled-input searching-input">
+                        </div>
+
+                        <h2>きのみを選んでください</h2>
+                        <div class="berry-grid" id="berry-grid">
+                            <!-- JS updates -->
+                        </div>
+
+                        <div class="flavor-explanation-container">
+                            <h3>フレーバーの特徴</h3>
+                            <table class="flavor-table">
+                                <thead>
+                                    <tr>
+                                        <th>フレーバー</th>
+                                        <th>特徴</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badgem sweet">スイート</span></td>
+                                        <td>サイズや色厳選用</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badgem spicy">スパイシー</span></td>
+                                        <td>技の威力や攻撃力アップ</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badgem sour">サワー</span></td>
+                                        <td>アイテム回収効率アップ</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badgem bitter">ビター</span></td>
+                                        <td>ダメージ軽減や耐久力アップ</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badgem fresh">フレッシュ</span></td>
+                                        <td>捕獲率や遭遇率アップ</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="flavor-value-guide">
+                                <h3>フレーバー数値の目安</h3>
+                                <ul class="value-guide-list">
+                                    <li><strong>120-155:</strong> <span>Lv.1 1つ</span></li>
+                                    <li><strong>160-195:</strong> <span>Lv.1 2つ</span></li>
+                                    <li><strong>200-235:</strong> <span>Lv.1 2つ or Lv.2 1つ (49.3% : 50.7%)</span></li>
+                                    <li><strong>240-295:</strong> <span>1つ目 Lv.1 ~ Lv.2(47.9% : 52.1%) + 2つ目 Lv.1</span>
+                                    </li>
+                                    <li><strong>300-355:</strong> <span>1つ目 Lv.1 ~ Lv.2(17.5% : 82.5%) + 2つ目 Lv.1</span>
+                                    </li>
+                                    <li><strong>360-415:</strong> <span>1つ目 Lv.1 ~ Lv.3(2.5% : 57.5% : 40%) + 2つ目 Lv.1 ~
+                                            Lv.2(81.5% : 18.5%)</span></li>
+                                    <li><strong>420-520:</strong> <span>1つ目 Lv.1 ~ Lv.3(1.3% : 35.9% : 62.8%) + 2つ目 Lv.1
+                                            ~ Lv.2(43.5% : 56.5%)</span></li>
+                                    <li><strong>525-695:</strong> <span>1つ目 Lv.2 ~ Lv.3(22.5% : 77.5%) + 2つ目 Lv.1 ~
+                                            Lv.2(13.0% : 87.0%)</span></li>
+                                    <li><strong>700-755:</strong> <span>1つ目 Lv.2 ~ Lv.3(9.0% : 91.0%) + 2つ目 Lv.1 ~
+                                            Lv.3(1.0% : 75.5% : 23.5%)</span></li>
+                                    <li><strong>760-:</strong> <span>1つ目 Lv.3確定 + 2つ目 Lv.2 ~ Lv.3(37.0% : 63.0%)</span>
+                                    </li>
+                                </ul>
+                                <p class="mix-donut-note">※ ミックスドーナツ（2つの値が同じで420より上の場合）は、フレーバー値が実質1ランク上のものが出る確率が上がります。
+                                </p>
+                                <div class="source-link">
+                                    <span>Source: </span>
+                                    <a href="https://www.youtube.com/watch?v=Bm6qgvKAids" target="_blank"
+                                        rel="noopener noreferrer">
+                                        【ポケモンZA】ドーナツ10000個検証：フレーバー値とフレーバーパワー付与確率を完全解説【M次元ラッシュ】
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Search Area -->
+                <div id="tab-search" class="tab-content">
+                    <div class="card search-card">
+                        <div class="search-form">
+                            <p class="search-hint">Lv3を狙える組み合わせを自動探索します</p>
+
+                            <div class="purpose-presets">
+                                <label>目的別プリセット:</label>
+                                <div class="preset-grid">
+                                    <button class="preset-btn" data-targets="sour,fresh" data-title="素材・資金稼ぎ">
+                                        <strong>素材・資金稼ぎ</strong>
+                                        <span>道具・どっさり・そうぐうLv3</span>
+                                    </button>
+                                    <button class="preset-btn" data-targets="sweet,active" data-title="色違い・サイズ・捕獲">
+                                        <strong>色違い・サイズ・捕獲</strong>
+                                        <span>かがやき・サイズ・ほかくLv3</span>
+                                    </button>
+                                    <button class="preset-btn" data-targets="spicy,bitter" data-title="経験・レイド">
+                                        <strong>経験・レイド</strong>
+                                        <span>こうげき・ぼうぎょ・経験値Lv3</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr class="separator">
+
+                            <div class="form-group">
+                                <label>揃えるフレーバー:</label>
+                                <div class="checkbox-group" id="flavor-select">
+                                    <label><input type="checkbox" value="sweet" checked> <span>スイート</span></label>
+                                    <label><input type="checkbox" value="spicy" checked> <span>スパイシー</span></label>
+                                    <label><input type="checkbox" value="sour"> <span>サワー</span></label>
+                                    <label><input type="checkbox" value="bitter"> <span>ビター</span></label>
+                                    <label><input type="checkbox" value="fresh"> <span>フレッシュ</span></label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>特定のドーナツを検索:</label>
+                                <select id="specific-donut-select" class="styled-input" style="width:100%;">
+                                    <option value="">- 未選択 -</option>
+                                    <option value="ナイトメアクルーラー">ナイトメアクルーラー (Darkrai)</option>
+                                    <option value="オールドファッションオメガ">オールドファッションオメガ (Groudon)</option>
+                                    <option value="オールドファッションアルファ">オールドファッションアルファ (Kyogre)</option>
+                                    <option value="オールドファッションデルタ">オールドファッションデルタ (Rayquaza)</option>
+                                    <option value="プラズマディップ">プラズマディップ (Zeraora)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>フレーバー数値(下限):</label>
+                                <input type="number" id="search-min-val" value="420" min="0" max="1000">
+                                <span style="font-size:0.8rem; color:var(--text-muted); margin-left:0.5rem;">kcal</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display:flex; align-items:center; cursor:pointer;">
+                                    <input type="checkbox" id="maximize-duration"
+                                        style="width:auto; margin-right:0.5rem;">
+                                    <span>ハラもち(持続時間)を最大化</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>スターランク (未選択で全対象):</label>
+                                <div class="checkbox-group" id="star-select">
+                                    <label><input type="checkbox" value="1"> <span>★1</span></label>
+                                    <label><input type="checkbox" value="2"> <span>★2</span></label>
+                                    <label><input type="checkbox" value="3"> <span>★3</span></label>
+                                    <label><input type="checkbox" value="4"> <span>★4</span></label>
+                                    <label><input type="checkbox" value="5"> <span>★5</span></label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>除外するきのみ (最大5種類):</label>
+                                <div class="select-group" id="exclude-berries">
+                                    <select class="exclude-berry-select">
+                                        <option value="">なし</option>
+                                        <option value="いじげんクラボのみ">いじげんクラボのみ</option>
+                                        <option value="いじげんカゴのみ">いじげんカゴのみ</option>
+                                        <option value="いじげんモモンのみ">いじげんモモンのみ</option>
+                                        <option value="いじげんチーゴのみ">いじげんチーゴのみ</option>
+                                        <option value="いじげんナナシのみ">いじげんナナシのみ</option>
+                                        <option value="いじげんオレンのみ">いじげんオレンのみ</option>
+                                        <option value="いじげんキーのみ">いじげんキーのみ</option>
+                                        <option value="いじげんラムのみ">いじげんラムのみ</option>
+                                        <option value="いじげんオボンのみ">いじげんオボンのみ</option>
+                                        <option value="いじげんザロクのみ">いじげんザロクのみ</option>
+                                        <option value="いじげんネコブのみ">いじげんネコブのみ</option>
+                                        <option value="いじげんタポルのみ">いじげんタポルのみ</option>
+                                        <option value="いじげんロメのみ">いじげんロメのみ</option>
+                                        <option value="いじげんウブのみ">いじげんウブのみ</option>
+                                        <option value="いじげんマトマのみ">いじげんマトマのみ</option>
+                                        <option value="いじげんオッカのみ">いじげんオッカのみ</option>
+                                        <option value="いじげんイトケのみ">いじげんイトケのみ</option>
+                                        <option value="いじげんソクノのみ">いじげんソクノのみ</option>
+                                        <option value="いじげんリンドのみ">いじげんリンドのみ</option>
+                                        <option value="いじげんヤチェのみ">いじげんヤチェのみ</option>
+                                        <option value="いじげんヨプのみ">いじげんヨプのみ</option>
+                                        <option value="いじげんビアーのみ">いじげんビアーのみ</option>
+                                        <option value="いじげんシュカのみ">いじげんシュカのみ</option>
+                                        <option value="いじげんバコウのみ">いじげんバコウのみ</option>
+                                        <option value="いじげんウタンのみ">いじげんウタンのみ</option>
+                                        <option value="いじげンタンガのみ">いじげンタンガのみ</option>
+                                        <option value="いじげんヨロギのみ">いじげんヨロギのみ</option>
+                                        <option value="いじげんカシブのみ">いじげんカシブのみ</option>
+                                        <option value="いじげんハバンのみ">いじげんハバンのみ</option>
+                                        <option value="いじげんナモのみ">いじげんナモのみ</option>
+                                        <option value="いじげんリリバのみ">いじげんリリバのみ</option>
+                                        <option value="いじげんホズのみ">いじげんホズのみ</option>
+                                        <option value="いじげんロゼルのみ">いじげんロゼルのみ</option>
+                                    </select>
+                                    <select class="exclude-berry-select">
+                                        <option value="">なし</option>
+                                        <option value="いじげんクラボのみ">いじげんクラボのみ</option>
+                                        <option value="いじげんカゴのみ">いじげんカゴのみ</option>
+                                        <option value="いじげんモモンのみ">いじげんモモンのみ</option>
+                                        <option value="いじげんチーゴのみ">いじげんチーゴのみ</option>
+                                        <option value="いじげんナナシのみ">いじげんナナシのみ</option>
+                                        <option value="いじげんオレンのみ">いじげんオレンのみ</option>
+                                        <option value="いじげんキーのみ">いじげんキーのみ</option>
+                                        <option value="いじげんラムのみ">いじげんラムのみ</option>
+                                        <option value="いじげんオボンのみ">いじげんオボンのみ</option>
+                                        <option value="いじげんザロクのみ">いじげんザロクのみ</option>
+                                        <option value="いじげんネコブのみ">いじげんネコブのみ</option>
+                                        <option value="いじげんタポルのみ">いじげんタポルのみ</option>
+                                        <option value="いじげんロメのみ">いじげんロメのみ</option>
+                                        <option value="いじげんウブのみ">いじげんウブのみ</option>
+                                        <option value="いじげんマトマのみ">いじげんマトマのみ</option>
+                                        <option value="いじげんオッカのみ">いじげんオッカのみ</option>
+                                        <option value="いじげんイトケのみ">いじげんイトケのみ</option>
+                                        <option value="いじげんソクノのみ">いじげんソクノのみ</option>
+                                        <option value="いじげんリンドのみ">いじげんリンドのみ</option>
+                                        <option value="いじげんヤチェのみ">いじげんヤチェのみ</option>
+                                        <option value="いじげんヨプのみ">いじげんヨプのみ</option>
+                                        <option value="いじげんビアーのみ">いじげんビアーのみ</option>
+                                        <option value="いじげんシュカのみ">いじげんシュカのみ</option>
+                                        <option value="いじげんバコウのみ">いじげんバコウのみ</option>
+                                        <option value="いじげんウタンのみ">いじげんウタンのみ</option>
+                                        <option value="いじげンタンガのみ">いじげンタンガのみ</option>
+                                        <option value="いじげんヨロギのみ">いじげんヨロギのみ</option>
+                                        <option value="いじげんカシブのみ">いじげんカシブのみ</option>
+                                        <option value="いじげんハバンのみ">いじげんハバンのみ</option>
+                                        <option value="いじげんナモのみ">いじげんナモのみ</option>
+                                        <option value="いじげんリリバのみ">いじげんリリバのみ</option>
+                                        <option value="いじげんホズのみ">いじげんホズのみ</option>
+                                        <option value="いじげんロゼルのみ">いじげんロゼルのみ</option>
+                                    </select>
+                                    <select class="exclude-berry-select">
+                                        <option value="">なし</option>
+                                        <option value="いじげんクラボのみ">いじげんクラボのみ</option>
+                                        <option value="いじげんカゴのみ">いじげんカゴのみ</option>
+                                        <option value="いじげんモモンのみ">いじげんモモンのみ</option>
+                                        <option value="いじげんチーゴのみ">いじげんチーゴのみ</option>
+                                        <option value="いじげんナナシのみ">いじげんナナシのみ</option>
+                                        <option value="いじげんオレンのみ">いじげんオレンのみ</option>
+                                        <option value="いじげんキーのみ">いじげんキーのみ</option>
+                                        <option value="いじげんラムのみ">いじげんラムのみ</option>
+                                        <option value="いじげんオボンのみ">いじげんオボンのみ</option>
+                                        <option value="いじげんザロクのみ">いじげんザロクのみ</option>
+                                        <option value="いじげんネコブのみ">いじげんネコブのみ</option>
+                                        <option value="いじげんタポルのみ">いじげんタポルのみ</option>
+                                        <option value="いじげんロメのみ">いじげんロメのみ</option>
+                                        <option value="いじげんウブのみ">いじげんウブのみ</option>
+                                        <option value="いじげんマトマのみ">いじげんマトマのみ</option>
+                                        <option value="いじげんオッカのみ">いじげんオッカのみ</option>
+                                        <option value="いじげんイトケのみ">いじげんイトケのみ</option>
+                                        <option value="いじげんソクノのみ">いじげんソクノのみ</option>
+                                        <option value="いじげんリンドのみ">いじげんリンドのみ</option>
+                                        <option value="いじげんヤチェのみ">いじげんヤチェのみ</option>
+                                        <option value="いじげんヨプのみ">いじげんヨプのみ</option>
+                                        <option value="いじげんビアーのみ">いじげんビアーのみ</option>
+                                        <option value="いじげんシュカのみ">いじげんシュカのみ</option>
+                                        <option value="いじげんバコウのみ">いじげんバコウのみ</option>
+                                        <option value="いじげんウタンのみ">いじげんウタンのみ</option>
+                                        <option value="いじげンタンガのみ">いじげンタンガのみ</option>
+                                        <option value="いじげんヨロギのみ">いじげんヨロギのみ</option>
+                                        <option value="いじげんカシブのみ">いじげんカシブのみ</option>
+                                        <option value="いじげんハバンのみ">いじげんハバンのみ</option>
+                                        <option value="いじげんナモのみ">いじげんナモのみ</option>
+                                        <option value="いじげんリリバのみ">いじげんリリバのみ</option>
+                                        <option value="いじげんホズのみ">いじげんホズのみ</option>
+                                        <option value="いじげんロゼルのみ">いじげんロゼルのみ</option>
+                                    </select>
+                                    <select class="exclude-berry-select">
+                                        <option value="">なし</option>
+                                        <option value="いじげんクラボのみ">いじげんクラボのみ</option>
+                                        <option value="いじげんカゴのみ">いじげんカゴのみ</option>
+                                        <option value="いじげんモモンのみ">いじげんモモンのみ</option>
+                                        <option value="いじげんチーゴのみ">いじげんチーゴのみ</option>
+                                        <option value="いじげんナナシのみ">いじげんナナシのみ</option>
+                                        <option value="いじげんオレンのみ">いじげんオレンのみ</option>
+                                        <option value="いじげんキーのみ">いじげんキーのみ</option>
+                                        <option value="いじげんラムのみ">いじげんラムのみ</option>
+                                        <option value="いじげんオボンのみ">いじげんオボンのみ</option>
+                                        <option value="いじげんザロクのみ">いじげんザロクのみ</option>
+                                        <option value="いじげんネコブのみ">いじげんネコブのみ</option>
+                                        <option value="いじげんタポルのみ">いじげんタポルのみ</option>
+                                        <option value="いじげんロメのみ">いじげんロメのみ</option>
+                                        <option value="いじげんウブのみ">いじげんウブのみ</option>
+                                        <option value="いじげんマトマのみ">いじげんマトマのみ</option>
+                                        <option value="いじげんオッカのみ">いじげんオッカのみ</option>
+                                        <option value="いじげんイトケのみ">いじげんイトケのみ</option>
+                                        <option value="いじげんソクノのみ">いじげんソクノのみ</option>
+                                        <option value="いじげんリンドのみ">いじげんリンドのみ</option>
+                                        <option value="いじげんヤチェのみ">いじげんヤチェのみ</option>
+                                        <option value="いじげんヨプのみ">いじげんヨプのみ</option>
+                                        <option value="いじげんビアーのみ">いじげんビアーのみ</option>
+                                        <option value="いじげんシュカのみ">いじげんシュカのみ</option>
+                                        <option value="いじげんバコウのみ">いじげんバコウのみ</option>
+                                        <option value="いじげんウタンのみ">いじげんウタンのみ</option>
+                                        <option value="いじげンタンガのみ">いじげンタンガのみ</option>
+                                        <option value="いじげんヨロギのみ">いじげんヨロギのみ</option>
+                                        <option value="いじげんカシブのみ">いじげんカシブのみ</option>
+                                        <option value="いじげんハバンのみ">いじげんハバンのみ</option>
+                                        <option value="いじげんナモのみ">いじげんナモのみ</option>
+                                        <option value="いじげんリリバのみ">いじげんリリバのみ</option>
+                                        <option value="いじげんホズのみ">いじげんホズのみ</option>
+                                        <option value="いじげんロゼルのみ">いじげんロゼルのみ</option>
+                                    </select>
+                                    <select class="exclude-berry-select">
+                                        <option value="">なし</option>
+                                        <option value="いじげんクラボのみ">いじげんクラボのみ</option>
+                                        <option value="いじげんカゴのみ">いじげんカゴのみ</option>
+                                        <option value="いじげんモモンのみ">いじげんモモンのみ</option>
+                                        <option value="いじげんチーゴのみ">いじげんチーゴのみ</option>
+                                        <option value="いじげんナナシのみ">いじげんナナシのみ</option>
+                                        <option value="いじげんオレンのみ">いじげんオレンのみ</option>
+                                        <option value="いじげんキーのみ">いじげんキーのみ</option>
+                                        <option value="いじげんラムのみ">いじげんラムのみ</option>
+                                        <option value="いじげんオボンのみ">いじげんオボンのみ</option>
+                                        <option value="いじげんザロクのみ">いじげんザロクのみ</option>
+                                        <option value="いじげんネコブのみ">いじげんネコブのみ</option>
+                                        <option value="いじげんタポルのみ">いじげんタポルのみ</option>
+                                        <option value="いじげんロメのみ">いじげんロメのみ</option>
+                                        <option value="いじげんウブのみ">いじげんウブのみ</option>
+                                        <option value="いじげんマトマのみ">いじげんマトマのみ</option>
+                                        <option value="いじげんオッカのみ">いじげんオッカのみ</option>
+                                        <option value="いじげんイトケのみ">いじげんイトケのみ</option>
+                                        <option value="いじげんソクノのみ">いじげんソクノのみ</option>
+                                        <option value="いじげんリンドのみ">いじげんリンドのみ</option>
+                                        <option value="いじげんヤチェのみ">いじげんヤチェのみ</option>
+                                        <option value="いじげんヨプのみ">いじげんヨプのみ</option>
+                                        <option value="いじげんビアーのみ">いじげんビアーのみ</option>
+                                        <option value="いじげんシュカのみ">いじげんシュカのみ</option>
+                                        <option value="いじげんバコウのみ">いじげんバコウのみ</option>
+                                        <option value="いじげんウタンのみ">いじげんウタンのみ</option>
+                                        <option value="いじげンタンガのみ">いじげンタンガのみ</option>
+                                        <option value="いじげんヨロギのみ">いじげんヨロギのみ</option>
+                                        <option value="いじげんカシブのみ">いじげんカシブのみ</option>
+                                        <option value="いじげんハバンのみ">いじげんハバンのみ</option>
+                                        <option value="いじげんナモのみ">いじげんナモのみ</option>
+                                        <option value="いじげんリリバのみ">いじげんリリバのみ</option>
+                                        <option value="いじげんホズのみ">いじげんホズのみ</option>
+                                        <option value="いじげんロゼルのみ">いじげんロゼルのみ</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button id="start-search" class="primary-btn">
+                                🔍 探索開始
+                            </button>
+                        </div>
+
+                        <div id="search-results" class="search-results"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Result & Comments -->
+            <div class="right-panel">
+                <section class="result-area">
+                    <h3>完成したドーナツ</h3>
+                    <div class="card result-card" id="donut-output">
+                        <div class="donut-placeholder">
+                            <div class="placeholder-icon">🍩</div>
+                            <p>きのみを選んでください<br>(最大8個まで)</p>
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- Comment Section -->
+                <div class="card comment-card-separate" id="comment-card">
+                    <div class="comment-header-row">
+                        <h3>💬 みんなの反応</h3>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <span style="font-size:0.7rem; color:#666;" id="debug-key"></span>
+                            <span class="comment-count-badge" id="comment-count">0</span>
+                        </div>
+                    </div>
+                    <div id="comment-list" class="comment-list">
+                        <p class="loading-text">きのみを選んでください</p>
+                    </div>
+                    <div class="comment-form-styled">
+                        <div class="input-row">
+                            <div class="avatar-placeholder">👤</div>
+                            <input type="text" id="comment-user" placeholder="Name" maxlength="12"
+                                class="styled-input name-input">
+                            <input type="text" id="comment-text" placeholder="コメントを入力..." maxlength="100"
+                                class="styled-input text-input">
+                            <button class="send-btn" onclick="postComment()">➤</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1rem;">
+                    <h3>人気ランキング</h3>
+                    <div id="ranking-list" class="ranking-list">
+                        <p class="loading-text">ランキングを読み込み中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <span id="close-help" class="close-modal">&times;</span>
+            <h2>使い方ガイド</h2>
+
+            <div class="help-section">
+                <h3>🍩 基本シミュレーター</h3>
+                <p>上のグリッドからきのみを選んでタップしてください。右側の「選択中のきのみ」に追加され、自動的に出来上がるドーナツの結果が計算されます。</p>
+            </div>
+
+            <div class="help-section">
+                <h3>🔍 ドーナツ検索 (Beta)</h3>
+                <p>「Lv3パワー」を発動できる最強の組み合わせを自動で探します。</p>
+                <ul>
+                    <li><strong>ミックス検索:</strong> 2つのフレーバーを選択 → 両方420以上を目指します。</li>
+                    <li><strong>単独検索:</strong> 1つのフレーバーを選択 → その値700以上を目指します。</li>
+                    <li><strong>スターランク指定:</strong> いじげんきのみのランク(★1〜5)で絞り込みます。</li>
+                    <li><strong>候補フレーバーパワー:</strong> 出やすいものから順に表示されます。フレーバー候補はLv2-3が出やすくなりますが、Lv1が出ることもあります。</li>
+                    <li><strong>確率のヒント:</strong> 候補フレーバーパワーの種類が少ないほど選択が減るので、目的の候補フレーバーの確率が上がります。</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>⚡️ 目的別プリセット</h3>
+                <p>ボタンを押すだけで、目的に合わせた最強レシピを検索します。</p>
+                <ul>
+                    <li><strong>素材・資金稼ぎ (Sour & Fresh):</strong> 道具・どっさり・そうぐうパワーLv3</li>
+                    <li><strong>色違い・サイズ (Sweet & Fresh):</strong> かがやき・サイズ・ほかくパワーLv3</li>
+                    <li><strong>レイド・戦闘 (Spicy & Bitter):</strong> HP・こうげき・ぼうぎょパワーLv3</li>
+                </ul>
+            </div>
+            <div class="help-section">
+                <h3>🏆 人気レシピランキング</h3>
+                <p>ユーザーの間で人気のレシピが表示されます。</p>
+                <p style="color: #fbbf24; font-size: 0.9rem; margin-top: 0.5rem;">※
+                    ランキングに反映させるには、レシピを「保存」または「共有」する必要があります。</p>
+            </div>
+
+            <div class="help-section">
+                <h3>💡 Hints</h3>
+                <p>検索結果は「Rank (味の良さ)」だけでなく、「はらもち」や「カロリー」も評価して、実用的なものを上位に表示しています。</p>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-content">
+            <p>© 2025 <a href="https://x.com/zephel01_vc" target="_blank" rel="noopener noreferrer">くーるぜろ (@zephel01_vc)</a></p>
+        </div>
+    </footer>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="version.js?v=1.9.5"></script>
+    <script src="data.js?v=1.9.5"></script>
+    <script src="simulator.js?v=1.9.5"></script>
+    <script src="app.js?v=1.9.5"></script>
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+        data-cf-beacon='{"token": "fb8a2854ce7a4facb7ba45a94b8a7e10"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+
+</html>

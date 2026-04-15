@@ -1,0 +1,16 @@
+# Git を除外
+.git
+.git/**
+**/.git
+**/.git/**
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# 任意：設定ファイルも公開したくないなら除外
+.wranglerignore
+.wrangler/
+.wrangler/**
+**/.wrangler/**
+

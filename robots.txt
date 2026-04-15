@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /api/
+Disallow: /.git/
+Disallow: /.wrangler/
+Disallow: /node_modules/
+Disallow: /src/
+Disallow: /scripts/
