@@ -1,0 +1,18 @@
+{
+  "name": "zadonutsimulator",
+  "version": "1.9.8",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250409.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.0.0"
+  }
+}

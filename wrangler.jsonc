@@ -1,11 +1,9 @@
 {
   "name": "zadonutsimulator",
-  "main": "src/worker.js",
-  "build": {
-    "command": ""
-  },
+  "main": "src/index.ts",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS"
   },
   "d1_databases": [
     {

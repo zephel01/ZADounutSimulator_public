@@ -4,6 +4,8 @@
 > きのみの組み合わせによって変化するドーナツの効果・持続時間・フレーバーパワーをリアルタイムで計算し、最適なレシピを探せます。
 
 [![Version](https://img.shields.io/badge/version-v1.9.8-blue)](./version.js)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Hono](https://img.shields.io/badge/Hono-4.x-E36002?logo=hono&logoColor=white)](https://hono.dev/)
 [![Deploy](https://img.shields.io/badge/deploy-Cloudflare_Workers-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](#license)
 [![Website](https://img.shields.io/badge/🌐_website-zadonutsimulator.zephel.com-4A90D9)](https://zadonutsimulator.zephel.com/)
@@ -34,9 +36,9 @@ Frontend:  HTML5 · CSS3 · Vanilla JavaScript
 Charts:    Canvas API (Radar Chart)
 Images:    html2canvas
 Fonts:     Google Fonts (Inter)
-Backend:   Cloudflare Workers
+Backend:   Cloudflare Workers · Hono v4 · TypeScript v5
 Database:  Cloudflare D1 (SQLite)
-Deploy:    Wrangler CLI
+Deploy:    Wrangler CLI v4
 ```
 
 ---
@@ -50,7 +52,7 @@ graph TD
     subgraph CF ["☁️ Cloudflare"]
         direction TB
         DNS["🌐 DNS\nzadonutsimulator.zephel.com"]
-        Worker["⚙️ Cloudflare Workers\nsrc/worker.js"]
+        Worker["⚙️ Cloudflare Workers\nsrc/index.ts (Hono)"]
         Assets["📦 Static Assets\nindex.html / app.js / style.css ..."]
         D1["🗄️ Cloudflare D1\nzadonut_db (SQLite)"]
         Analytics["📊 Web Analytics"]
@@ -58,7 +60,7 @@ graph TD
 
     User -->|"HTTPS リクエスト"| DNS
     DNS --> Worker
-    Worker -->|"静的ファイル配信"| Assets
+    Worker -->|"/api/* 以外はフォールスルー"| Assets
     Assets -->|"HTML / JS / CSS"| User
     Worker -->|"POST /api/comments\nGET  /api/comments\nGET  /api/ranking\nPOST /api/register\nDELETE /api/admin/comments/:id"| D1
     D1 -->|"JSON レスポンス"| Worker
@@ -79,8 +81,10 @@ graph TD
 ├── data.js          # きのみデータ・ドーナツ定義
 ├── version.js       # バージョン管理
 ├── wrangler.jsonc   # Cloudflare デプロイ設定
+├── package.json     # 依存関係
+├── tsconfig.json    # TypeScript 設定
 ├── src/
-│   └── worker.js    # Cloudflare Workers API
+│   └── index.ts     # Cloudflare Workers API (Hono + TypeScript)
 └── schema.sql       # D1 データベーススキーマ
 ```
 
@@ -92,26 +96,25 @@ graph TD
 
 - [Node.js](https://nodejs.org/) v18 以上
 - [Cloudflare アカウント](https://dash.cloudflare.com/sign-up)（無料枠で動作します）
-- Wrangler CLI
 
-### 1. Wrangler のインストール
-
-```bash
-npm install -g wrangler
-wrangler login
-```
-
-### 2. リポジトリをクローン
+### 1. リポジトリをクローン
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/ZADounutSimulator.git
 cd ZADounutSimulator
 ```
 
+### 2. 依存パッケージをインストール・ログイン
+
+```bash
+npm install
+npx wrangler login
+```
+
 ### 3. D1 データベースを作成
 
 ```bash
-wrangler d1 create zadonut_db
+npx wrangler d1 create zadonut_db
 ```
 
 コマンド実行後に表示される `database_id` を `wrangler.jsonc` に貼り付けます。
@@ -129,7 +132,7 @@ wrangler d1 create zadonut_db
 ### 4. スキーマを適用
 
 ```bash
-wrangler d1 execute zadonut_db --remote --file=./schema.sql
+npx wrangler d1 execute zadonut_db --remote --file=./schema.sql
 ```
 
 ### 5. 管理者キーをシークレットとして登録
@@ -137,14 +140,15 @@ wrangler d1 execute zadonut_db --remote --file=./schema.sql
 > ⚠️ `ADMIN_KEY` は **絶対にコードやファイルに直接書かないでください**。
 
 ```bash
-wrangler secret put ADMIN_KEY
-# プロンプトが出るのでキーを入力（例: 自分だけが知る任意の文字列）
+npx wrangler secret put ADMIN_KEY
 ```
+
+プロンプトが出るので任意のキーを入力してください。
 
 ### 6. デプロイ
 
 ```bash
-wrangler deploy
+npm run deploy
 ```
 
 デプロイ後、`https://zadonutsimulator.<your-subdomain>.workers.dev` でアクセスできます。
@@ -153,15 +157,25 @@ wrangler deploy
 
 ## 💻 ローカル開発
 
-```bash
-# ローカルサーバー起動（D1 はローカルに自動作成されます）
-wrangler dev
+ローカル D1 にスキーマ適用（初回のみ）：
 
-# ローカル D1 にスキーマ適用
-wrangler d1 execute zadonut_db --local --file=./schema.sql
+```bash
+npx wrangler d1 execute zadonut_db --local --file=./schema.sql
+```
+
+ローカルサーバー起動：
+
+```bash
+npm run dev
 ```
 
 `http://localhost:8787` でアクセスできます。
+
+型チェック：
+
+```bash
+npm run type-check
+```
 
 ---
 
@@ -188,4 +202,4 @@ MIT License — 自由に使用・改変・再配布できます。
 
 ---
 
-*Created by [くーるぜろ (@zephel01)](https://note.com/zephel01)*
+*Created by [くーるぜろ](https://note.com/zephel01)*
