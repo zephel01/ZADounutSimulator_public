@@ -1,4 +1,6 @@
 import { Hono } from 'hono'
+import { HTTPException } from 'hono/http-exception'
+import { validator } from 'hono/validator'
 
 // ===== 型定義 =====
 
@@ -7,6 +9,8 @@ type Bindings = {
   ADMIN_KEY: string
   ASSETS: Fetcher
 }
+
+type Env = { Bindings: Bindings }
 
 type CommentRow = {
   id: number
@@ -23,57 +27,34 @@ type RecipeRow = {
   count: number
 }
 
-type RegisterBody = {
-  key: string
-  name: string
-  berries: string[]
+// ===== バリデーション =====
+
+const requireString = (val: unknown, field: string): string => {
+  if (typeof val !== 'string' || val.trim() === '') {
+    throw new HTTPException(400, { message: `${field} is required` })
+  }
+  return val.trim()
 }
 
-type CommentBody = {
-  recipe_key: string
-  user_name: string
-  comment: string
-}
+// ===== API ルーター =====
 
-// ===== Hono アプリ =====
+const api = new Hono<Env>()
 
-const app = new Hono<{ Bindings: Bindings }>()
+// --- レシピ登録 / カウントインクリメント ---
+api.post(
+  '/register',
+  validator('json', (body) => {
+    const key = requireString(body.key, 'key')
+    const name = requireString(body.name, 'name')
+    const berries = body.berries
+    if (!Array.isArray(berries) || berries.length === 0) {
+      throw new HTTPException(400, { message: 'berries must be a non-empty array' })
+    }
+    return { key, name, berries: berries as string[] }
+  }),
+  async (c) => {
+    const { key, name, berries } = c.req.valid('json')
 
-// テーブル自動作成（開発環境の初回起動向け）
-app.use('/api/*', async (c, next) => {
-  try {
-    await c.env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS comments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        recipe_key TEXT NOT NULL,
-        user_name TEXT NOT NULL,
-        comment TEXT NOT NULL,
-        created_at INTEGER DEFAULT (strftime('%s', 'now'))
-      )
-    `).run()
-  } catch (e) {
-    console.error('Table init failed:', e)
-  }
-  await next()
-})
-
-// ===== API Routes =====
-
-// レシピ登録 / カウントインクリメント
-app.post('/api/register', async (c) => {
-  let body: RegisterBody
-  try {
-    body = await c.req.json<RegisterBody>()
-  } catch {
-    return c.text('Invalid JSON', 400)
-  }
-
-  const { key, name, berries } = body
-  if (!key || !name || !berries) {
-    return c.text('Missing fields', 400)
-  }
-
-  try {
     await c.env.DB.prepare(`
       INSERT INTO recipes (key, name, berries, count)
       VALUES (?, ?, ?, 1)
@@ -82,29 +63,31 @@ app.post('/api/register', async (c) => {
       .bind(key, name, JSON.stringify(berries))
       .run()
 
-    return c.text('OK')
-  } catch (err) {
-    return c.text((err as Error).message, 500)
+    return c.json({ ok: true })
   }
-})
+)
 
-// コメント投稿
-app.post('/api/comments', async (c) => {
-  let body: CommentBody
-  try {
-    body = await c.req.json<CommentBody>()
-  } catch {
-    return c.text('Invalid JSON', 400)
-  }
+// --- コメント投稿 ---
+api.post(
+  '/comments',
+  validator('json', (body) => {
+    const recipe_key = requireString(body.recipe_key, 'recipe_key')
+    const user_name = requireString(body.user_name, 'user_name')
+    const comment = requireString(body.comment, 'comment')
 
-  const { recipe_key, user_name, comment } = body
-  if (!recipe_key || !user_name || !comment) {
-    return c.text('Missing fields', 400)
-  }
+    if (user_name.length > 20) {
+      throw new HTTPException(400, { message: 'user_name must be 20 chars or less' })
+    }
+    if (comment.length > 200) {
+      throw new HTTPException(400, { message: 'comment must be 200 chars or less' })
+    }
 
-  const now = Math.floor(Date.now() / 1000)
+    return { recipe_key, user_name, comment }
+  }),
+  async (c) => {
+    const { recipe_key, user_name, comment } = c.req.valid('json')
+    const now = Math.floor(Date.now() / 1000)
 
-  try {
     await c.env.DB.prepare(`
       INSERT INTO comments (recipe_key, user_name, comment, created_at)
       VALUES (?, ?, ?, ?)
@@ -112,77 +95,72 @@ app.post('/api/comments', async (c) => {
       .bind(recipe_key, user_name, comment, now)
       .run()
 
-    return c.text('OK')
-  } catch (err) {
-    return c.text((err as Error).message, 500)
+    return c.json({ ok: true }, 201)
   }
-})
+)
 
-// コメント一覧取得
-app.get('/api/comments', async (c) => {
-  const recipe_key = c.req.query('key')
-  if (!recipe_key) {
-    return c.text('Missing key', 400)
-  }
+// --- コメント一覧取得 ---
+api.get(
+  '/comments',
+  validator('query', (query) => {
+    const key = requireString(query.key, 'key')
+    return { key }
+  }),
+  async (c) => {
+    const { key } = c.req.valid('query')
 
-  try {
     const { results } = await c.env.DB.prepare(`
       SELECT * FROM comments WHERE recipe_key = ? ORDER BY created_at DESC
     `)
-      .bind(recipe_key)
+      .bind(key)
       .all<CommentRow>()
 
     return c.json(results)
-  } catch (err) {
-    return c.text((err as Error).message, 500)
   }
-})
+)
 
-// [Admin] コメント削除
-// Authorization: Bearer <ADMIN_KEY> ヘッダーが必要
-app.delete('/api/admin/comments/:id', async (c) => {
-  const adminKey = c.env.ADMIN_KEY
+// --- [Admin] コメント削除 ---
+api.delete('/admin/comments/:id', async (c) => {
   const authHeader = c.req.header('Authorization')
+  const adminKey = c.env.ADMIN_KEY
 
   if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
-    return c.text('Unauthorized', 401)
+    throw new HTTPException(401, { message: 'Unauthorized' })
   }
 
   const id = c.req.param('id')
 
-  try {
-    await c.env.DB.prepare('DELETE FROM comments WHERE id = ?').bind(id).run()
-    return c.text('Deleted')
-  } catch (err) {
-    return c.text((err as Error).message, 500)
-  }
+  await c.env.DB.prepare('DELETE FROM comments WHERE id = ?').bind(id).run()
+
+  return c.json({ ok: true })
 })
 
-// 人気ランキング取得（上位10件）
-app.get('/api/ranking', async (c) => {
-  try {
-    const { results } = await c.env.DB.prepare(`
-      SELECT * FROM recipes ORDER BY count DESC LIMIT 10
-    `).all<RecipeRow>()
+// --- 人気ランキング取得（上位10件） ---
+api.get('/ranking', async (c) => {
+  const { results } = await c.env.DB.prepare(`
+    SELECT * FROM recipes ORDER BY count DESC LIMIT 10
+  `).all<RecipeRow>()
 
-    return c.json(results)
-  } catch (err) {
-    return c.text((err as Error).message, 500)
-  }
+  return c.json(results)
 })
 
-// ===== エクスポート =====
-// /api/* は Hono で処理し、それ以外は Cloudflare Assets にフォールスルー
+// ===== メインアプリ =====
 
-export default {
-  async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
-    const { pathname } = new URL(request.url)
+const app = new Hono<Env>()
 
-    if (pathname.startsWith('/api/')) {
-      return app.fetch(request, env, ctx)
-    }
+// API をマウント
+app.route('/api', api)
 
-    // 静的アセット（HTML / CSS / JS / 画像）を ASSETS バインディング経由で配信
-    return env.ASSETS.fetch(request)
-  },
-} satisfies ExportedHandler<Bindings>
+// グローバルエラーハンドラ
+app.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    return c.json({ error: err.message }, err.status)
+  }
+  console.error('Unhandled error:', err)
+  return c.json({ error: 'Internal Server Error' }, 500)
+})
+
+// 静的アセット（HTML / CSS / JS / 画像）を ASSETS バインディング経由で配信
+app.all('*', (c) => c.env.ASSETS.fetch(c.req.raw))
+
+export default app
