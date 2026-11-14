@@ -57,11 +57,29 @@ check(nm.powerOdds.avgCount <= 2, `特別ドーナツ抽選枠≤2 (平均 ${nm.
 const rb = FB.computeBudgets({ sweet: 420, spicy: 420, sour: 0, bitter: 0, fresh: 130 });
 check(rb.isRainbow && rb.levelBudgets.sweet === 7 && rb.levelBudgets.fresh === 2 && rb.levelBudgets.sour === 0, 'レインボー +1');
 
+// 6b) v2.0.1: レインボー +1 は 120 以上の味のみ / 最大値 120 未満の同値はレインボーではない
+const rb2 = FB.computeBudgets({ sweet: 420, spicy: 420, sour: 50, bitter: 0, fresh: 0 });
+check(rb2.isRainbow && rb2.levelBudgets.sour === 0 && rb2.levelBudgets.spicy === 7, 'レインボー: 120未満の味は予算0のまま');
+const rb3 = FB.computeBudgets({ sweet: 100, spicy: 100, sour: 0, bitter: 0, fresh: 0 });
+check(!rb3.isRainbow && rb3.levelBudgets.sweet === 0, 'レインボー: 最大値120未満は対象外');
+
+// 6c) v2.0.1: きのみ 3 個未満はパワーなし
+const two = calculateDonutResult(rep('いじげんタンガのみ', 2), 420, { withOdds: true, oddsIterations: 2000 });
+check(two.powerOdds.avgCount === 0 && Object.keys(two.powerOdds.byFamily).length === 0, 'きのみ2個 → パワーなし');
+const three = calculateDonutResult(rep('いじげんタンガのみ', 3), 420, { withOdds: true, oddsIterations: 2000 });
+check(three.powerOdds.avgCount > 0, `きのみ3個 → パワーあり (平均 ${three.powerOdds.avgCount})`);
+check(FB.rollPowers({ sweet: 760, spicy: 0, sour: 0, bitter: 0, fresh: 0 }, { rng }).length > 0, 'berryCount 未指定時は従来どおり');
+
+// 6d) v2.0.1: コスト表は分数・各行の合計 = 1
+check(Object.values(FB.COST_PROB).every(r => Math.abs(r.reduce((a, b) => a + b, 0) - 1) < 1e-12) && FB.COST_PROB[5][0] === 4 / 21, 'コスト表: 分数・合計1');
+
 // 7) 従来互換・滞在時間
 const d = calculateDonutResult(rep('いじげんリリバのみ', 8));
 check(['totals', 'finalLevel', 'finalKcal', 'powers', 'stars', 'duration'].every(k => k in d), '従来フィールド維持');
 const d5 = calculateDonutResult(rep('いじげんリリバのみ', 8), 420, { distortionStars: 5 });
 check(d5.duration === Math.floor(d.finalKcal / 10) && d5.durationByDistortion[1] === d.finalKcal, `歪み★別滞在 (★5: ${d5.duration}s, ★1: ${d5.durationByDistortion[1]}s)`);
+const d4 = calculateDonutResult(rep('いじげんリリバのみ', 8), 420, { distortionStars: 4 });
+check(d4.duration === Math.floor(d.finalKcal / 7.52), `★4消費率 7.52 (★4: ${d4.duration}s)`);
 const low = calculateDonutResult(rep('クラボのみ', 3), 420, { distortionStars: 5 });
 check(low.catchPenalty === 0.3, `捕獲率補正 (★${low.stars} で★5歪み → ${low.catchPenalty})`);
 

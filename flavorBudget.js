@@ -27,18 +27,21 @@
     ];
   }
 
-  /** Level Budget → [cost1, cost2, cost3] の確率（%） */
+  /** Level Budget → [cost1, cost2, cost3] の確率（v2.0.1: RotomLabs 実装と同じ分数で保持） */
   const COST_PROB = {
-    1: [100, 0, 0],
-    2: [100, 0, 0],
-    3: [50, 50, 0],
-    4: [25, 75, 0],
-    5: [19.05, 42.86, 38.10],
-    6: [14.29, 28.57, 57.14],
-    7: [9.52, 33.33, 57.14],
-    8: [0, 33.33, 66.67],
-    9: [0, 0, 100]
+    1: [1, 0, 0],
+    2: [1, 0, 0],
+    3: [1 / 2, 1 / 2, 0],
+    4: [1 / 4, 3 / 4, 0],
+    5: [4 / 21, 9 / 21, 8 / 21],
+    6: [1 / 7, 2 / 7, 4 / 7],
+    7: [2 / 21, 7 / 21, 12 / 21],
+    8: [0, 2 / 6, 4 / 6],
+    9: [0, 0, 1]
   };
+
+  /** ドーナツを作るのに必要な最小きのみ数（これ未満はフレーバーパワーなし） */
+  const MIN_BERRIES = 3;
 
   const TYPES = ['ノーマル', 'ほのお', 'みず', 'でんき', 'くさ', 'こおり', 'かくとう', 'どく', 'じめん',
     'ひこう', 'エスパー', 'むし', 'いわ', 'ゴースト', 'ドラゴン', 'あく', 'はがね', 'フェアリー', 'ぜんぶ']; // 19 = 57/3
@@ -110,12 +113,13 @@
   function computeBudgets(totals, opts = {}) {
     const values = FLAVORS.map(f => totals[f] || 0);
     const max = Math.max(...values);
-    const isRainbow = max > 0 && values.filter(v => v === max).length >= 2;
+    // v2.0.1: レインボーは「最大値が 120 以上で、かつ同値の味が 2 つ以上」（RotomLabs 実装準拠）
+    const isRainbow = max >= 120 && values.filter(v => v === max).length >= 2;
     const levelBudgets = {};
     FLAVORS.forEach((f, i) => {
       let b = lookup(FLAVOR_LEVEL_BUDGET, values[i]);
-      // ASSUMPTION: レインボーの +1 は値が 0 より大きいフレーバーに適用（資料は "every flavor"）、上限 9
-      if (isRainbow && values[i] > 0) b = Math.min(9, b + 1);
+      // v2.0.1: レインボーの +1 は値が 120 以上の味のみ（120 未満の味は予算 0 のまま）、上限 9
+      if (isRainbow && values[i] >= 120) b = Math.min(9, b + 1);
       levelBudgets[f] = b;
     });
     const sum = values.reduce((a, b) => a + b, 0);
@@ -141,6 +145,8 @@
    */
   function rollPowers(totals, opts = {}) {
     const rng = opts.rng || Math.random;
+    // v2.0.1: きのみ 3 個未満ではドーナツが作れないためパワーなし（opts.berryCount 指定時のみ判定）
+    if (typeof opts.berryCount === 'number' && opts.berryCount < MIN_BERRIES) return [];
     // 特別ドーナツは 1 枠目が専用パワーで埋まるため、抽選枠は残り 2
     // ASSUMPTION: 専用パワーは総予算を消費しない
     const maxPowers = opts.maxPowers || (opts.special ? 2 : 3);
@@ -223,7 +229,7 @@
   }
 
   const api = {
-    FLAVORS, FLAVOR_LEVEL_BUDGET, COST_PROB, POWER_DEFS, ALL_POWERS, TYPES,
+    FLAVORS, FLAVOR_LEVEL_BUDGET, COST_PROB, MIN_BERRIES, POWER_DEFS, ALL_POWERS, TYPES,
     totalBudgetTable, computeBudgets, rollPowers, estimateProbabilities, mulberry32
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
