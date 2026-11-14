@@ -20,3 +20,17 @@ node_modules
 node_modules/**
 _OUTPUTS
 _OUTPUTS/**
+
+# 設定・ソース・開発用ファイルは公開しない（database_id 等の露出防止）
+wrangler.jsonc
+wrangler.toml
+src
+src/**
+package.json
+package-lock.json
+tsconfig.json
+schema.sql
+README.md
+test.js
+.gitignore
+.assetsignore
