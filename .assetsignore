@@ -14,3 +14,9 @@
 .wrangler/**
 **/.wrangler/**
 
+
+# 依存パッケージ・作業出力は公開しない
+node_modules
+node_modules/**
+_OUTPUTS
+_OUTPUTS/**
