@@ -1,6 +1,15 @@
 /**
- * 星レベルごとの消費率テーブル
+ * 歪み（ワイルドゾーン）の★ごとのハラモチ消費率 [Cal/秒]
+ * ★1≒1, ★5≒10 は Game8 の実測値。★2〜4 は出典未確認（従来値を据え置き）。
+ * v2: 消費率は「ドーナツの★」ではなく「入る歪みの★」で決まる。
  */
+/** v2: flavorBudget.js（window.FlavorBudget / require）を取得 */
+function getFlavorBudgetApi() {
+    if (typeof FlavorBudget !== 'undefined') return FlavorBudget;
+    if (typeof require === 'function') { try { return require('./flavorBudget.js'); } catch (e) { return null; } }
+    return null;
+}
+
 const ENERGY_CONSUMPTION_RATES = {
     1: 1.0,
     2: 1.6,
@@ -17,7 +26,7 @@ const ENERGY_CONSUMPTION_RATES = {
 function getCorrectionFactor(totalFlavorRank) {
     if (totalFlavorRank >= 960) return { factor: 1.5, stars: 5 };
     if (totalFlavorRank >= 700) return { factor: 1.4, stars: 4 };
-    if (totalFlavorRank >= 360) return { factor: 1.3, stars: 3 };
+    if (totalFlavorRank >= 350) return { factor: 1.3, stars: 3 }; // v2: 360→350 (Bulbapedia / RotomLabs)
     if (totalFlavorRank >= 240) return { factor: 1.2, stars: 2 };
     if (totalFlavorRank >= 120) return { factor: 1.1, stars: 1 };
     return { factor: 1.0, stars: 0 };
@@ -27,9 +36,14 @@ function getCorrectionFactor(totalFlavorRank) {
  * 8つのきのみからドーナツの結果を計算する
  * @param {Array} selectedBerries 
  * @param {number} minVal 判定の閾値 (デフォルト420)
+ * @param {Object} [opts]
+ * @param {number} [opts.distortionStars] 入る歪みの★(1-5)。未指定時はドーナツの★で代用（従来互換）
+ * @param {boolean} [opts.withOdds] true で予算方式のパワー出現率（モンテカルロ）を付与。探索ループでは使わないこと
+ * @param {number} [opts.oddsIterations] 出現率推定の試行回数（既定 5000）
+ * @param {number} [opts.totalTop9] 総予算9の閾値（既定960、Serebii説は900）
  * @returns {Object} 計算結果
  */
-function calculateDonutResult(selectedBerries, minVal = 420) {
+function calculateDonutResult(selectedBerries, minVal = 420, opts = {}) {
     if (selectedBerries.length === 0) {
         return null;
     }
@@ -135,7 +149,26 @@ function calculateDonutResult(selectedBerries, minVal = 420) {
         isMixDonut,
         powers: calculateFlavorPowers(totals, isMixDonut),
         stars,
-        duration: stars > 0 ? Math.floor(finalKcal / ENERGY_CONSUMPTION_RATES[stars]) : 0
+        duration: (() => {
+            const ds = opts.distortionStars || stars;
+            return ds > 0 ? Math.floor(finalKcal / ENERGY_CONSUMPTION_RATES[ds]) : 0;
+        })(),
+        // v2: 歪みの★別の滞在秒数
+        durationByDistortion: Object.fromEntries(
+            [1, 2, 3, 4, 5].map(ds => [ds, Math.floor(finalKcal / ENERGY_CONSUMPTION_RATES[ds])])
+        ),
+        // v2: 歪みよりドーナツの★が低い場合の捕獲率補正（1段下 0.9 / 2段以上下 0.3）
+        catchPenalty: opts.distortionStars
+            ? (opts.distortionStars - stars >= 2 ? 0.3 : opts.distortionStars - stars === 1 ? 0.9 : 1.0)
+            : null,
+        // v2: 予算方式（RotomLabs / Anubis データマイン）
+        budget: (typeof getFlavorBudgetApi === 'function' && getFlavorBudgetApi())
+            ? getFlavorBudgetApi().computeBudgets(totals, opts) : null,
+        powerOdds: (opts.withOdds && typeof getFlavorBudgetApi === 'function' && getFlavorBudgetApi())
+            ? getFlavorBudgetApi().estimateProbabilities(totals, {
+                iterations: opts.oddsIterations || 5000, totalTop9: opts.totalTop9,
+                special: !!pokemon
+            }) : null
     };
 }
 

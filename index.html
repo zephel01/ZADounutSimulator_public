@@ -150,7 +150,9 @@
                                     <li><strong>760-:</strong> <span>1つ目 Lv.3確定 + 2つ目 Lv.2 ~ Lv.3(37.0% : 63.0%)</span>
                                     </li>
                                 </ul>
-                                <p class="mix-donut-note">※ ミックスドーナツ（2つの値が同じで420より上の場合）は、フレーバー値が実質1ランク上のものが出る確率が上がります。
+                                <p class="mix-donut-note">※ ミックス（レインボー）ドーナツ（最大のフレーバー値が2つ以上同じ場合）は、全フレーバーのレベル予算が+1されるため、実質1ランク上のパワーが出やすくなります。
+                                </p>
+                                <p class="mix-donut-note">※ v2.0.0 から、フレーバーパワーの出現率はデータマイン情報（RotomLabs / Anubis氏）に基づく予算方式で計算しています。上の目安表（10000個検証）とも一致することを確認済みです。
                                 </p>
                                 <div class="source-link">
                                     <span>Source: </span>
@@ -499,8 +501,8 @@
                     <li><strong>ミックス検索:</strong> 2つのフレーバーを選択 → 両方420以上を目指します。</li>
                     <li><strong>単独検索:</strong> 1つのフレーバーを選択 → その値700以上を目指します。</li>
                     <li><strong>スターランク指定:</strong> いじげんきのみのランク(★1〜5)で絞り込みます。</li>
-                    <li><strong>候補フレーバーパワー:</strong> 出やすいものから順に表示されます。フレーバー候補はLv2-3が出やすくなりますが、Lv1が出ることもあります。</li>
-                    <li><strong>確率のヒント:</strong> 候補フレーバーパワーの種類が少ないほど選択が減るので、目的の候補フレーバーの確率が上がります。</li>
+                    <li><strong>フレーバーパワー出現率:</strong> パワーごとの出現率とLv別の内訳を表示します。「1個つくってみる」で実際の抽選を試せます。</li>
+                    <li><strong>確率のヒント:</strong> パワーは最大3個・各フレーバー2カテゴリから1個ずつ。タイプ付きのパワー（かがやき等）は19種から均等に選ばれます。</li>
                 </ul>
             </div>
 
@@ -533,10 +535,11 @@
     </footer>
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="version.js?v=1.9.5"></script>
-    <script src="data.js?v=1.9.5"></script>
-    <script src="simulator.js?v=1.9.5"></script>
-    <script src="app.js?v=1.9.5"></script>
+    <script src="version.js?v=2.0.0"></script>
+    <script src="data.js?v=2.0.0"></script>
+    <script src="flavorBudget.js?v=2.0.0"></script>
+    <script src="simulator.js?v=2.0.0"></script>
+    <script src="app.js?v=2.0.0"></script>
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
         data-cf-beacon='{"token": "fb8a2854ce7a4facb7ba45a94b8a7e10"}'></script><!-- End Cloudflare Web Analytics -->
