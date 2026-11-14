@@ -95,7 +95,7 @@ function updateUI() {
 
     // 結果表示
     if (state.selectedBerries.length > 0) {
-        const result = calculateDonutResult(state.selectedBerries);
+        const result = calculateDonutResult(state.selectedBerries, 420, { withOdds: true, oddsIterations: 8000 });
         if (result) {
             renderResult(result);
             // Title stays static or General
@@ -182,23 +182,17 @@ function renderResult(result) {
         }
     }
 
-    // Duration calculation for display
-    const rates = {
-        1: 1.0,
-        2: 1.6,
-        3: 3.5,
-        4: 7.5,
-        5: 10.0
-    };
+    // 歪みの★ごとの滞在時間（v2: simulator.js の durationByDistortion を使用）
     const durationHTML = [1, 2, 3, 4, 5].map(star => {
-        const consumption = rates[star];
-        const totalSeconds = Math.floor(finalKcal / consumption);
-        const highlightClass = star === 5 ? 'highlight' : '';
+        const totalSeconds = result.durationByDistortion ? result.durationByDistortion[star] : 0;
+        const lowStar = result.stars < star;
+        const highlightClass = [star === 5 ? 'highlight' : '', lowStar ? 'under-star' : ''].join(' ');
         return `
             <div class="duration-box ${highlightClass}">
                 <div class="star-label">★${star}</div>
                 <div class="time-main">${formatDuration(totalSeconds)}</div>
                 <div class="time-sub">${totalSeconds}秒</div>
+                ${lowStar ? `<div class="time-penalty">捕獲率×${star - result.stars >= 2 ? '0.3' : '0.9'}</div>` : ''}
             </div>
         `;
     }).join('');
@@ -227,7 +221,7 @@ function renderResult(result) {
                 <div class="duration-grid">
                     ${durationHTML}
                 </div>
-                <p class="duration-note">※ 消費レート: ★5 = 10 kcal/秒</p>
+                <p class="duration-note">※ 歪みの★で消費量が変わります（★1≒1 / ★5≒10 kcal/秒、★2〜4は推定値）。ドーナツの★が歪みより低いと捕獲率が下がります。</p>
             </div>
 
             <div class="radar-container">
@@ -248,27 +242,74 @@ function renderResult(result) {
                 ${renderFlavorRow('フレッシュ', totals.fresh, 'var(--fresh-color)', maxFlavor)}
             </div>
 
-            ${result.powers && result.powers.length > 0 ? `
-                <div class="power-candidates">
-                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-align: center;">
-                        候補フレーバーパワー
-                    </div>
-                    <div class="power-grid">
-                        ${result.powers.slice(0, 20).map(p => `
-                            <div class="power-tag">
-                                <div class="flavor-indicator" style="background: var(--${p.flavor}-color)"></div>
-                                <span class="power-name">${p.name}</span>
-                                <span class="power-level">Lv.${p.level}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
+            ${renderPowerOdds(result)}
         </div>
     `;
 
     // canvasがDOMに追加された直後に描画
     setTimeout(() => drawRadarChart(totals), 0);
+}
+
+/**
+ * v2: 予算方式によるフレーバーパワー出現率の表示
+ */
+function renderPowerOdds(result) {
+    const odds = result.powerOdds;
+    const budget = result.budget;
+    if (!odds || !budget) return '';
+    const flavorOf = {};
+    if (typeof FlavorBudget !== 'undefined') {
+        FlavorBudget.ALL_POWERS.forEach(p => { flavorOf[p.family] = p.flavor; });
+    }
+    const levelsOf = family => [1, 2, 3].map(lv => {
+        const v = odds.byFamilyLevel[`${family} Lv.${lv}`] || 0;
+        return `<span class="odds-lv ${v > 0 ? '' : 'zero'}">Lv${lv} ${v.toFixed(1)}%</span>`;
+    }).join('');
+    const rows = Object.entries(odds.byFamily);
+    const budgetText = `総予算 ${budget.totalBudget}${budget.isRainbow ? '・レインボー(全味+1)' : ''}`;
+    return `
+        <div class="power-candidates">
+            <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-align: center;">
+                フレーバーパワー 出現率
+            </div>
+            <div class="odds-meta">${budgetText}・平均 ${odds.avgCount} 個${result.pokemon ? '（＋専用パワー）' : ''}</div>
+            ${rows.length === 0 ? '<div class="odds-meta">フレーバーパワーは付きません（各味120未満または合計120未満）</div>' : `
+            <div class="odds-list">
+                ${rows.map(([family, pct]) => `
+                    <div class="odds-row">
+                        <div class="flavor-indicator" style="background: var(--${flavorOf[family] || 'sweet'}-color)"></div>
+                        <div class="odds-name">${family}</div>
+                        <div class="odds-bar-bg"><div class="odds-bar" style="width:${pct}%; background: var(--${flavorOf[family] || 'sweet'}-color)"></div></div>
+                        <div class="odds-pct">${pct.toFixed(1)}%</div>
+                        <div class="odds-levels">${levelsOf(family)}</div>
+                    </div>
+                `).join('')}
+            </div>`}
+            <div class="odds-sim">
+                <button type="button" class="action-btn" onclick="rollOneDonut()">🎲 1個つくってみる</button>
+                <div id="odds-sim-result" class="power-grid"></div>
+            </div>
+            <div class="odds-note">※ 出現率はデータマイン情報に基づく推定（8,000回試行）。わざ/めんえき/ほかく/かがやきのタイプは均等抽選（19種）。</div>
+        </div>
+    `;
+}
+
+/**
+ * v2: 現在の組み合わせでドーナツを1個抽選して表示
+ */
+function rollOneDonut() {
+    const el = document.getElementById('odds-sim-result');
+    if (!el || typeof FlavorBudget === 'undefined' || state.selectedBerries.length === 0) return;
+    const r = calculateDonutResult(state.selectedBerries);
+    const ps = FlavorBudget.rollPowers(r.totals, { special: !!r.pokemon });
+    const tags = ps.map(p => `
+        <div class="power-tag">
+            <div class="flavor-indicator" style="background: var(--${p.flavor}-color)"></div>
+            <span class="power-name">${p.sub ? `${p.family}：${p.sub}` : p.family}</span>
+            <span class="power-level">Lv.${p.level}</span>
+        </div>`).join('');
+    el.innerHTML = (r.pokemon ? `<div class="power-tag"><span class="power-name">専用パワー（${r.pokemon}）</span></div>` : '') +
+        (tags || '<div class="power-tag"><span class="power-name">パワーなし</span></div>');
 }
 
 function renderFlavorRow(label, value, color, max) {

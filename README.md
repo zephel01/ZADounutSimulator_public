@@ -3,7 +3,7 @@
 > Pokemon Legends ZA 向けのドーナツレシピ調合シミュレーター。  
 > きのみの組み合わせによって変化するドーナツの効果・持続時間・フレーバーパワーをリアルタイムで計算し、最適なレシピを探せます。
 
-[![Version](https://img.shields.io/badge/version-v1.9.8-blue)](./version.js)
+[![Version](https://img.shields.io/badge/version-v2.0.0-blue)](./version.js)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Hono](https://img.shields.io/badge/Hono-4.x-E36002?logo=hono&logoColor=white)](https://hono.dev/)
 [![Deploy](https://img.shields.io/badge/deploy-Cloudflare_Workers-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
@@ -17,6 +17,7 @@
 | 機能 | 説明 |
 |------|------|
 | **リアルタイムシミュレーション** | きのみを最大8個選ぶだけで即座にドーナツ結果を計算 |
+| **フレーバーパワー出現率** | データマイン準拠の予算方式でパワーごとの出現率・Lv内訳を表示、1個抽選も可能（v2.0.0） |
 | **最適レシピ探索** | 「かがやきパワーLv2-3」など目標パワーに合う組み合わせを10,000回探索 |
 | **伝説ドーナツ検索** | ナイトメアクルーラー・オールドファッションシリーズなど特別なドーナツのレシピを検索 |
 | **レーダーチャート** | 5フレーバー（スイート・スパイシー・サワー・ビター・フレッシュ）を視覚化 |
@@ -78,6 +79,8 @@ graph TD
 ├── style.css        # デザイン・アニメーション
 ├── app.js           # UIロジック・イベント処理
 ├── simulator.js     # ドーナツ計算・探索アルゴリズム
+├── flavorBudget.js  # フレーバーパワー抽選エンジン（予算方式, v2.0.0）
+├── test.js          # 検算スクリプト（node test.js）
 ├── data.js          # きのみデータ・ドーナツ定義
 ├── version.js       # バージョン管理
 ├── wrangler.jsonc   # Cloudflare デプロイ設定

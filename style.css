@@ -1856,3 +1856,19 @@ footer {
 .footer-content a:hover {
     color: #6366f1;
 }
+/* ===== v2.0.0: フレーバーパワー出現率 ===== */
+.odds-meta { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 0.25rem 0 0.75rem; }
+.odds-list { display: flex; flex-direction: column; gap: 0.45rem; }
+.odds-row { display: grid; grid-template-columns: 6px minmax(7rem, 1fr) 2fr 3.5rem; grid-template-rows: auto auto; column-gap: 0.5rem; align-items: center; }
+.odds-row .flavor-indicator { grid-row: 1 / span 2; height: 100%; width: 6px; border-radius: 3px; }
+.odds-name { font-size: 0.85rem; font-weight: 600; }
+.odds-bar-bg { height: 8px; background: rgba(127,127,127,0.18); border-radius: 4px; overflow: hidden; }
+.odds-bar { height: 100%; border-radius: 4px; }
+.odds-pct { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; font-size: 0.85rem; }
+.odds-levels { grid-column: 2 / span 3; display: flex; gap: 0.5rem; font-size: 0.72rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.odds-lv.zero { opacity: 0.35; }
+.odds-sim { margin-top: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.odds-sim .power-grid { width: 100%; }
+.odds-note { margin-top: 0.75rem; font-size: 0.72rem; color: var(--text-muted); text-align: center; }
+.duration-box.under-star { opacity: 0.75; }
+.time-penalty { font-size: 0.7rem; color: #f87171; margin-top: 0.2rem; }

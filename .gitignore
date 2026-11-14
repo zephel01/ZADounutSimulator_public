@@ -25,3 +25,6 @@ yarn-error.log*
 # Build output
 dist/
 build/
+
+# 作業出力
+_OUTPUTS/
