@@ -1,6 +1,7 @@
 /**
  * 歪み（ワイルドゾーン）の★ごとのハラモチ消費率 [Cal/秒]
- * ★1≒1, ★5≒10 は Game8 の実測値。★2〜4 は出典未確認（従来値を据え置き）。
+ * v2.0.1: AppMedia の対応表（100/160/350/752/1000 kcal で 100 秒）に準拠。
+ *         ★1〜5 = 1.0 / 1.6 / 3.5 / 7.52 / 10.0（RotomLabs は ★4 を 7.5 で丸め）。
  * v2: 消費率は「ドーナツの★」ではなく「入る歪みの★」で決まる。
  */
 /** v2: flavorBudget.js（window.FlavorBudget / require）を取得 */
@@ -14,7 +15,7 @@ const ENERGY_CONSUMPTION_RATES = {
     1: 1.0,
     2: 1.6,
     3: 3.5,
-    4: 7.5,
+    4: 7.52,
     5: 10.0
 };
 
@@ -167,7 +168,8 @@ function calculateDonutResult(selectedBerries, minVal = 420, opts = {}) {
         powerOdds: (opts.withOdds && typeof getFlavorBudgetApi === 'function' && getFlavorBudgetApi())
             ? getFlavorBudgetApi().estimateProbabilities(totals, {
                 iterations: opts.oddsIterations || 5000, totalTop9: opts.totalTop9,
-                special: !!pokemon
+                special: !!pokemon,
+                berryCount: selectedBerries.length
             }) : null
     };
 }

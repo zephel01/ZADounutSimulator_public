@@ -221,7 +221,7 @@ function renderResult(result) {
                 <div class="duration-grid">
                     ${durationHTML}
                 </div>
-                <p class="duration-note">※ 歪みの★で消費量が変わります（★1≒1 / ★5≒10 kcal/秒、★2〜4は推定値）。ドーナツの★が歪みより低いと捕獲率が下がります。</p>
+                <p class="duration-note">※ 歪みの★で消費量が変わります（★1〜5: 1 / 1.6 / 3.5 / 7.52 / 10 kcal/秒）。ドーナツの★が歪みより低いと捕獲率が下がります。</p>
             </div>
 
             <div class="radar-container">
@@ -273,7 +273,9 @@ function renderPowerOdds(result) {
                 フレーバーパワー 出現率
             </div>
             <div class="odds-meta">${budgetText}・平均 ${odds.avgCount} 個${result.pokemon ? '（＋専用パワー）' : ''}</div>
-            ${rows.length === 0 ? '<div class="odds-meta">フレーバーパワーは付きません（各味120未満または合計120未満）</div>' : `
+            ${rows.length === 0 ? `<div class="odds-meta">${state.selectedBerries.length < FlavorBudget.MIN_BERRIES
+                ? `きのみが${FlavorBudget.MIN_BERRIES}個未満のため、ドーナツは作れません（フレーバーパワーなし）`
+                : 'フレーバーパワーは付きません（各味120未満または合計120未満）'}</div>` : `
             <div class="odds-list">
                 ${rows.map(([family, pct]) => `
                     <div class="odds-row">
@@ -301,7 +303,7 @@ function rollOneDonut() {
     const el = document.getElementById('odds-sim-result');
     if (!el || typeof FlavorBudget === 'undefined' || state.selectedBerries.length === 0) return;
     const r = calculateDonutResult(state.selectedBerries);
-    const ps = FlavorBudget.rollPowers(r.totals, { special: !!r.pokemon });
+    const ps = FlavorBudget.rollPowers(r.totals, { special: !!r.pokemon, berryCount: state.selectedBerries.length });
     const tags = ps.map(p => `
         <div class="power-tag">
             <div class="flavor-indicator" style="background: var(--${p.flavor}-color)"></div>
