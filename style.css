@@ -1898,3 +1898,30 @@ footer {
 .recipe-sources { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; }
 .recipe-sources a { color: inherit; }
 @media (max-width: 600px) { .recipe-metrics { grid-template-columns: repeat(2, 1fr); } }
+
+/* ===== v2.1.1: ★4・★5 周回先ガイド ===== */
+.farm-guide h4 { font-size: 0.88rem; margin: 0.9rem 0 0.4rem; }
+.farm-table-wrap { overflow-x: auto; }
+.farm-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.farm-table th, .farm-table td { border-bottom: 1px solid var(--glass-border); padding: 0.4rem 0.45rem; text-align: left; vertical-align: top; }
+.farm-table th { color: var(--text-muted); font-weight: 700; white-space: nowrap; }
+.farm-table td:first-child { font-weight: 700; white-space: nowrap; }
+.farm-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; }
+@media (max-width: 600px) { .farm-table td:first-child { white-space: normal; } }
+
+.farm-matrix th, .farm-matrix td { text-align: center; }
+.farm-matrix td:first-child { text-align: left; white-space: normal; min-width: 8rem; }
+.farm-matrix td small { display: block; font-size: 0.65rem; color: var(--text-muted); font-weight: 400; }
+.farm-matrix .row-group td { text-align: left; font-weight: 700; background: rgba(127,127,127,0.12); }
+.farm-matrix .m-best { background: rgba(22,163,74,0.18); font-weight: 700; }
+.farm-matrix .m-o { background: rgba(22,163,74,0.07); }
+.farm-matrix .m-p { background: rgba(217,119,6,0.12); }
+.farm-matrix .m-q { background: rgba(59,130,246,0.10); }
+.farm-matrix .m-x { color: var(--text-muted); }
+.farm-matrix { min-width: 680px; }
+.farm-matrix td small { white-space: nowrap; }
+.farm-matrix td:first-child small { white-space: normal; }
+.farm-matrix th:first-child, .farm-matrix td:first-child { position: sticky; left: 0; z-index: 1; background: var(--card-bg); backdrop-filter: blur(6px); }
+.farm-matrix .row-group td { position: static; }
+.farm-scroll-hint { display: none; font-size: 0.7rem; color: var(--text-muted); text-align: right; margin-bottom: 0.2rem; }
+@media (max-width: 760px) { .farm-scroll-hint { display: block; } }
