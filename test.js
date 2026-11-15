@@ -5,8 +5,9 @@ const FB = require(path.join(here, 'flavorBudget.js'));
 const ctx = { console, Math, FlavorBudget: FB, Object, Set, Array };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(dataDir, 'data.js'), 'utf8') + '\n' +
-  fs.readFileSync(path.join(here, 'simulator.js'), 'utf8') +
-  '\n;globalThis.__api={BERRIES,calculateDonutResult,findDonutCombinations,getCorrectionFactor};', ctx);
+  fs.readFileSync(path.join(here, 'simulator.js'), 'utf8') + '\n' +
+  (fs.existsSync(path.join(here, 'recipes.js')) ? fs.readFileSync(path.join(here, 'recipes.js'), 'utf8') : '') +
+  '\n;globalThis.__api={BERRIES,calculateDonutResult,findDonutCombinations,getCorrectionFactor,RR:globalThis.RecommendedRecipes};', ctx);
 const { BERRIES, calculateDonutResult, getCorrectionFactor } = ctx.__api;
 const B = n => { const b = BERRIES.find(x => x.name === n); assert(b, n); return b; };
 const rep = (n, c) => Array(c).fill(B(n));
@@ -88,3 +89,17 @@ let t0 = Date.now(); const res = ctx.__api.findDonutCombinations(['sweet'], 700,
 check(Array.isArray(res), `探索関数動作 (20000回 ${Date.now() - t0}ms, 結果${res.length}件)`);
 t0 = Date.now(); calculateDonutResult(mixed, 420, { withOdds: true });
 console.log(`INFO withOdds 5000回 推定時間: ${Date.now() - t0}ms`);
+
+// 9) v2.1.0: おすすめレシピ（全レシピのきのみが存在・8個以内・確率が妥当）
+const RR = ctx.__api.RR;
+check(!!RR && RR.RECIPES.length >= 10, `おすすめレシピ定義 (${RR ? RR.RECIPES.length : 0}件)`);
+if (RR) {
+  const bad = RR.RECIPES.filter(r => r.berries.some(([n]) => !BERRIES.find(b => b.name === n)) || r.berries.reduce((a, [, c]) => a + c, 0) !== 8);
+  check(bad.length === 0, 'レシピのきのみ名・個数(8個)が正しい' + (bad.length ? ' NG: ' + bad.map(r => JSON.stringify(r.berries)).join(';') : ''));
+  const t8 = RR.evaluate(RR.RECIPES.find(r => r.purpose === 'shiny' && r.tag === '確率最大'));
+  near(+(t8.p[1] * 100).toFixed(1), 32.9, 2.0, 'レシピ: タンガ×8 かがやきLv3');
+  const k8 = RR.evaluate(RR.RECIPES.find(r => r.purpose === 'berry' && r.tag === '確率最大'));
+  near(+(k8.p[2] * 100).toFixed(1), 14.3, 1.5, 'レシピ: カシブ×8 きのみLv3');
+  const namo = RR.evaluate(RR.RECIPES.find(r => r.tag === '店売りのみ'));
+  check(namo.p[1] === 0 && namo.hard === 0 && namo.d.durationByDistortion[4] === 89, `レシピ: ナモ×8 Lv2以上0%・★4滞在${namo.d.durationByDistortion[4]}秒`);
+}
