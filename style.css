@@ -1872,3 +1872,29 @@ footer {
 .odds-note { margin-top: 0.75rem; font-size: 0.72rem; color: var(--text-muted); text-align: center; }
 .duration-box.under-star { opacity: 0.75; }
 .time-penalty { font-size: 0.7rem; color: #f87171; margin-top: 0.2rem; }
+
+/* ===== v2.1.0: おすすめレシピ ===== */
+.recipe-purpose { display: flex; gap: 0.5rem; margin: 0.5rem 0 1rem; flex-wrap: wrap; }
+.recipe-purpose-btn { flex: 1; min-width: 7rem; padding: 0.55rem 0.75rem; border-radius: 10px; border: 1px solid var(--glass-border); background: transparent; color: var(--text-muted); font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.recipe-purpose-btn.active { background: rgba(127,127,127,0.15); color: inherit; border-color: currentColor; }
+.recipe-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.recipe-loading { text-align: center; color: var(--text-muted); padding: 1rem; }
+.recipe-card { border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.recipe-head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.recipe-tag { font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; background: rgba(127,127,127,0.2); }
+.recipe-tag.tag-rec { background: #16a34a; color: #fff; }
+.recipe-tag.tag-max { background: #d97706; color: #fff; }
+.recipe-berries { font-weight: 700; font-size: 0.9rem; }
+.recipe-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+.recipe-metric { background: rgba(127,127,127,0.1); border-radius: 8px; padding: 0.35rem 0.4rem; text-align: center; }
+.recipe-metric small { display: block; font-size: 0.68rem; color: var(--text-muted); }
+.recipe-metric b { font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.recipe-sub { font-size: 0.75rem; color: var(--text-muted); }
+.recipe-note { font-size: 0.8rem; }
+.recipe-load { align-self: flex-start; }
+.recipe-tips { margin-top: 1.25rem; }
+.recipe-tips h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+.recipe-tips ul { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; }
+.recipe-sources { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; }
+.recipe-sources a { color: inherit; }
+@media (max-width: 600px) { .recipe-metrics { grid-template-columns: repeat(2, 1fr); } }

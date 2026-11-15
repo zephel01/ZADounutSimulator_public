@@ -54,6 +54,7 @@
                     <button class="tab-btn active" data-tab="selection">選択中のきのみ <span
                             id="selection-count">(0/8)</span></button>
                     <button class="tab-btn" data-tab="search">ドーナツ検索</button>
+                    <button class="tab-btn" data-tab="recipes">おすすめレシピ</button>
                 </div>
 
                 <!-- Tab 1: Selection Area -->
@@ -434,6 +435,41 @@
                         <div id="search-results" class="search-results"></div>
                     </div>
                 </div>
+
+                <!-- Tab 3: Recommended Recipes (v2.1.0) -->
+                <div id="tab-recipes" class="tab-content">
+                    <div class="card recipe-card-wrap">
+                        <p class="search-hint">目的と節約レベル別のおすすめレシピです。確率はこの画面を開いたときに計算しています。</p>
+                        <div class="recipe-purpose">
+                            <button type="button" class="recipe-purpose-btn active" data-purpose="shiny">✨ 色違い</button>
+                            <button type="button" class="recipe-purpose-btn" data-purpose="berry">🍇 きのみ集め</button>
+                            <button type="button" class="recipe-purpose-btn" data-purpose="ball">⚾ ボール集め</button>
+                        </div>
+                        <div id="recipe-list" class="recipe-list"></div>
+
+                        <div class="recipe-tips">
+                            <h3>★4 周回のコツ</h3>
+                            <ul>
+                                <li><strong>広さは中規模がおすすめ。</strong>ボールが多く、時間内にボーナスボールまで取りやすい。大規模は量が増えるがボールとタスクを探すのが大変。小規模はボール数が2〜7個とばらつく。</li>
+                                <li><strong>疲れた日は「ナモのみ×8」（店売り）で小規模を回り、ボールだけ割る。</strong>★4の滞在は約1分半。いじげんきのみを減らさずに数を稼げる。</li>
+                                <li><strong>どうぐ:きのみはLvが大事。</strong>付く確率はどのレシピでも約17%でほぼ同じ。節約するほど低いLvしか出なくなり、滞在も短くなる。</li>
+                                <li><strong>カシブなど特定のきのみは狙って出せない。</strong>レアなきのみは★4〜5の異次元と、金色のボーナスボールから出やすい。</li>
+                                <li><strong>どっさりLv3にこだわりすぎない。</strong>中規模ではきのみLv3だけで約40個、どっさりLv2も付くと約80個という検証報告がある。</li>
+                                <li><strong>珍しいボールは★5の異次元のみ。</strong>最後の金ボールでは確実に出る。1つの異次元につき最大1個まで。</li>
+                                <li><strong>配達員のトレーナーは優先して倒す。</strong>バトル後に話しかけると、いじげんきのみがもらえる。</li>
+                            </ul>
+                            <p class="recipe-sources">参考:
+                                <a href="https://game8.co/games/Pokemon-Legends-Z-A/archives/571117" target="_blank" rel="noopener noreferrer">Game8</a> /
+                                <a href="https://game8.jp/pokemon-legends-z-a/749672" target="_blank" rel="noopener noreferrer">Game8（日本語）</a> /
+                                <a href="https://altema.jp/legendsza/ijigenkinomi" target="_blank" rel="noopener noreferrer">アルテマ</a> /
+                                <a href="https://dengekionline.com/article/202601/64223" target="_blank" rel="noopener noreferrer">電撃オンライン</a> /
+                                <a href="https://allthings.how/?p=3627" target="_blank" rel="noopener noreferrer">All Things How</a> /
+                                <a href="https://gist.ly/youtube-summarizer/farm-better-berries-in-pokemon-legends-ultra-space-zones" target="_blank" rel="noopener noreferrer">検証動画（要約）</a> /
+                                <a href="https://recapio.com/digest/get-rare-pokeballs-2-ways-in-mega-dimension-pokemon-legends-z-a-by-austin-john-plays" target="_blank" rel="noopener noreferrer">ボール集め動画（要約）</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Right Panel: Result & Comments -->
@@ -535,11 +571,12 @@
     </footer>
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="version.js?v=2.0.1"></script>
-    <script src="data.js?v=2.0.1"></script>
-    <script src="flavorBudget.js?v=2.0.1"></script>
-    <script src="simulator.js?v=2.0.1"></script>
-    <script src="app.js?v=2.0.1"></script>
+    <script src="version.js?v=2.1.0"></script>
+    <script src="data.js?v=2.1.0"></script>
+    <script src="flavorBudget.js?v=2.1.0"></script>
+    <script src="simulator.js?v=2.1.0"></script>
+    <script src="app.js?v=2.1.0"></script>
+    <script src="recipes.js?v=2.1.0"></script>
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
         data-cf-beacon='{"token": "fb8a2854ce7a4facb7ba45a94b8a7e10"}'></script><!-- End Cloudflare Web Analytics -->
