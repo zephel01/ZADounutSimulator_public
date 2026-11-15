@@ -103,3 +103,19 @@ if (RR) {
   const namo = RR.evaluate(RR.RECIPES.find(r => r.tag === '店売りのみ'));
   check(namo.p[1] === 0 && namo.hard === 0 && namo.d.durationByDistortion[4] === 89, `レシピ: ナモ×8 Lv2以上0%・★4滞在${namo.d.durationByDistortion[4]}秒`);
 }
+
+// 10) v2.2.0: アメ集めレシピ
+if (RR) {
+  const c8 = RR.evaluate(RR.RECIPES.find(r => r.purpose === 'candy' && r.tag === '確率最大'));
+  near(+(c8.p[2] * 100).toFixed(1), 14.6, 1.5, 'レシピ: カシブ×8 アメLv3');
+  check(RR.RECIPES.filter(r => r.purpose === 'candy').length === 4, 'アメ集めレシピ 4件');
+}
+
+// 11) v2.2.0: どうぐパワー系の目的（おたから・とくべつ・コイン）
+if (RR) {
+  for (const key of ['treasure', 'special', 'coin']) {
+    const rs = RR.RECIPES.filter(r => r.purpose === key);
+    const top = RR.evaluate(rs.find(r => r.tag === '確率最大'));
+    check(rs.length >= 3 && !!RR.PURPOSES[key] && top.p[0] > 0.14 && top.p[0] < 0.19, `目的 ${key}: ${rs.length}件・付く確率 ${(top.p[0] * 100).toFixed(1)}%`);
+  }
+}

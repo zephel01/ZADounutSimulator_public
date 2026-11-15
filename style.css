@@ -1925,3 +1925,14 @@ footer {
 .farm-matrix .row-group td { position: static; }
 .farm-scroll-hint { display: none; font-size: 0.7rem; color: var(--text-muted); text-align: right; margin-bottom: 0.2rem; }
 @media (max-width: 760px) { .farm-scroll-hint { display: block; } }
+
+/* ===== v2.2.0: けいけんアメ ===== */
+.candy-size { min-width: 0; }
+.recipe-purpose-btn { min-width: 6rem; }
+
+.recipe-purpose { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); }
+.recipe-purpose-btn { min-width: 0; font-size: 0.85rem; padding: 0.5rem 0.4rem; }
+
+.candy-star { min-width: 520px; font-size: 0.74rem; }
+.candy-star th, .candy-star td { padding: 0.35rem 0.3rem; }
+.candy-star td:first-child { min-width: 2.5rem; }
